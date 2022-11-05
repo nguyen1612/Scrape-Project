@@ -107,16 +107,16 @@ function Scrape() {
         <form className="compiler split-wrap gap-2" onSubmit={e => e.preventDefault()}>
             <div className='half-break'>
                 <div className="mb-1">
-                    <label htmlFor="1" className="label mb-1">Url</label>
-                    <input type="text" id="1" className="input" ref={url} required/>
+                    <label htmlFor="url" className="label mb-1">Base Url</label>
+                    <input type="text" id="url" className="input" ref={url} required/>
                 </div>
                 <div className="mb-1">
-                    <label htmlFor="1" className="label mb-1">Selector</label>
-                    <input type="text" className="input" ref={selector} required/>
+                    <label htmlFor="link" className="label mb-1">Data Selector</label>
+                    <input type="text" className="input" id="link" ref={selector} required/>
                 </div>
                 <div className="mb-1">
-                    <label htmlFor="1" className="label mb-1">Alias Selector</label>
-                    <input type="text" className="input" ref={alias_selector} required/>
+                    <label htmlFor="alias" className="label mb-1">Alias Selector</label>
+                    <input type="text" className="input" id="alias" ref={alias_selector} required/>
                 </div>
             </div>
 

@@ -2,6 +2,50 @@ function Instruction() {
     return <div className="mt-2">
     <h3>Setting Instructions</h3>
         <div className="instructions">
+            <div>
+                <div className="mb-2">
+                    <strong className="title">Data Selector</strong>
+                    <ul className="list">
+                        <li className="title-small"><span className="list-key">Default</span>: "" (String)</li>
+                    </ul>
+                    <p className="desc mt-1" style={{whiteSpace: "pre-line"}}>{`- A query selector that scrape data from specified`} <span className="list-key">Base Url</span>
+                        {`
+
+                            - The string will be pass to document.querySelectorAll('YOUR SELECTOR'). Return value is an array (NodeList)
+                        `}
+                    </p>
+                </div>
+            </div>
+
+            <div>
+                <div className="mb-2">
+                    <strong className="title">Alias Selector</strong>
+                    <ul className="list">
+                        <li className="title-small"><span className="list-key">Default</span>: "" (String)</li>
+                    </ul>
+                    <p className="desc mt-1" style={{whiteSpace: "pre-line"}}>{`- A query selector that give an alias name for the result of `} <span className="list-key">Data Selector</span>
+                        {`
+
+                            - The string will be pass to document.querySelectorAll('YOUR SELECTOR'). Return value is an array (NodeList)
+
+                            - Usually, this is a name replacement for the link. When you scrape the link, it will display the alias name instead of the link url.
+                            
+                            - Internal system use innerText to get the alias name from the `} {<span className="list-key">Alias Selector</span>}. In many cases, the {<span className="list-key">Alias Selector</span>} will 
+                            be same as the {<span className="list-key">Data Selector</span>}. {`
+                            
+                            You can test your query to target website as following:
+
+                            const tmp = document.querySelectorAll( "YOUR ALIAS SELECTOR" );
+                            tmp[0].innerText;
+                            tmp[1].innerText;
+                            ...
+                            tmp[n].innerText;
+                            `}
+                        
+                    </p>
+                </div>
+            </div>
+
             <div className="">
                 <div className="mb-2">
                     <strong className="title">Download Options</strong>
@@ -30,9 +74,10 @@ function Instruction() {
                         - More tabs will result in RAM consumption and low Internet speed due to loading all resouces at once. 
                         
                         - If you have 16GB RAM memory and each tab takes 30MB, then 200-300 tabs might be enough (~9GB). Although you can increase as high as you want, the internet speed normally not as high as you expected
-
+                    
+                    `}
                         - <i className="txt-red">NOTICE:</i> you should consider the Internet speed and external resources that your computer and the browser itself consume as well.
-                    `}</p>
+                    </p>
                 </div>
                 <div className="mb-2">
                     <strong className="title">Wait Queue</strong>
@@ -53,7 +98,7 @@ function Instruction() {
                 </div>
                 
                 <div className="mb-2">
-                    <strong className="title">Max Single Image Size</strong>
+                    <strong className="title">Max Single Image Size <span className="txt-red"> (Deprecated)</span></strong>
                     <div className="constrain mt-1">
                         <ul className="list">
                             <li className="title-small"><span className="list-key">Default</span>: 0 (MB)</li>
@@ -118,13 +163,13 @@ function Instruction() {
                         <br/><br/>
                         - <i className="txt-red">NOTICE:</i> To maximize chance to bypass bot detection, you can apply following settings:
 
+                    </p>
                         <ul className="list mt-1">
                             <li><span className="list-key mb-2">Bypass Bot</span>: True</li>
                             <li><span className="list-key mb-1">Open Browser</span> True</li>
                             <li><span className="list-key mb-1">Max Queue</span> 20-50 tabs (optional but should not too much)</li>
                             <li><span className="list-key mb-1">Wait Queue</span> 5 (optional but bigger is better)</li>
                         </ul>
-                    </p>
                 </div>
 
             </div>

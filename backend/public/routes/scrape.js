@@ -6,7 +6,9 @@ const { executablePath } = require('puppeteer')
 
 const {
     scrapeLinks,
-    validate_obj
+    validate_obj,
+    validate_obj_2,
+    scrapeImages
 } = require('./utils')
 
 
@@ -50,8 +52,42 @@ router.post('/downloadLinks', (req, res) => {
 
 
 router.post('/downloadImages', (req, res) => {
-    console.log(req.body);
-    res.sendStatus(200);
+    const keys = Object.keys(req.body);
+    const keyLength = keys.length;
+
+    if (keyLength !== 10)
+        return res.sendStatus(400)
+    
+    if (!validate_obj_2(req.body))
+        return res.sendStatus(400);
+
+
+    const {
+        queryImage, path, bypass, maxQueue, waitQueue, 
+        imageSize, imgTypes, convertTo, headless, links
+    } = req.body
+
+    const options = {
+        headless,
+        executablePath: executablePath()
+    }
+
+
+    if (bypass)
+        web.use(plugin)
+    web.launch(options).then(async browser => {
+        try {
+            // console.log('REACH')
+            const queue = {maxQueue, waitQueue}
+            await scrapeImages(browser, links, queue, queryImage, path, imageSize, imgTypes, convertTo);
+
+            browser.close();
+            res.sendStatus(200);
+        } catch (err) {
+            console.log(err)
+            res.sendStatus(400)
+        }
+    })
 })
 
 module.exports = router

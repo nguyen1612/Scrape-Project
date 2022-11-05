@@ -1,30 +1,30 @@
 import {useState, useEffect, useRef, useId} from 'react';
 import axios from 'axios'
 
+import {
+    DOWNLOAD_ALL,
+    DOWNLOAD_DIFF,
+    DOWNLOAD_SELECT
+} from './Download'
 
-const DOWNLOAD_ALL = 'DOWNLOAD_ALL';
-const DOWNLOAD_DIFF = 'DOWNLOAD_DIFF';
-const DOWNLOAD_SELECT = 'DOWNLOAD_SELECT';
-
-const NONE = 'none'
+const DEFAULT = 'default'
 
 const settingInit = {
-    downloadType: DOWNLOAD_ALL, // ALL, DIFF, SELECT,
+    // downloadType: DOWNLOAD_ALL, // ALL, DIFF, SELECT,
 
     maxQueue: 20,
     waitQueue: 0,
     imageSize: 0,
 
-    headless: false,
+    headless: true,
     optimize: true,
     bypass: false,
 
-    
     png: true,
     jpg: true,
-    webp: true,
+    webp: false,
 
-    convertTo: NONE
+    convertTo: DEFAULT
 }
 
 const fixedURL = 'http://localhost:5000/scrape';
@@ -32,7 +32,9 @@ const headers = {
     'Content-Type': 'application/json'
 }
 
-function Options({links}) {
+function Options({links, downloadType}) {
+    console.log('\n', links)
+
     const queryImage = useRef(null);
     const path = useRef(null);
 
@@ -59,6 +61,7 @@ function Options({links}) {
         if (setting.webp) data.imgTypes.push('webp');
 
         data.convertTo = setting.convertTo.toLowerCase();
+        data.links = links;
 
         axios.post(`${fixedURL}/downloadImages`, data, {headers})
              .then(data => console.log('Sucess'))
@@ -66,7 +69,8 @@ function Options({links}) {
     }
 
     function changeDownload(e) {
-        setSetting(p => ({...p, downloadType: e.target.id}))
+        // setSetting(p => ({...p, downloadType: e.target.id}))
+        downloadType(e.target.id)
     }
 
     function changeQueue(e) {
@@ -98,7 +102,7 @@ function Options({links}) {
 
         <div className="flex-between mb-2">
             <div>
-                <input type="radio" name="download" id={DOWNLOAD_ALL} onChange={changeDownload}/>
+                <input type="radio" name="download" id={DOWNLOAD_ALL} defaultChecked onChange={changeDownload}/>
                 <label htmlFor={DOWNLOAD_ALL}>Download All</label>
             </div>
             <div>
@@ -127,7 +131,7 @@ function Options({links}) {
 
                 <div className="mb-1">
                     <label htmlFor="imageSize" className="label">Max Single Image Size (MB)</label>
-                    <input type="number" name="imageSize" id="imageSize" min="1" max="30" className="input-small" 
+                    <input type="number" name="imageSize" id="imageSize" min="0" max="30" className="input-small" 
                             value={setting.imageSize} onChange={changeQueue} />
                 </div>
             </div>

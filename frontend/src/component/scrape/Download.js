@@ -3,11 +3,16 @@ import {  useState, useEffect} from "react"
 import Options from "./Options"
 import Instruction from "./Instruction"
 
+export const DOWNLOAD_ALL = 'DOWNLOAD_ALL';
+export const DOWNLOAD_DIFF = 'DOWNLOAD_DIFF';
+export const DOWNLOAD_SELECT = 'DOWNLOAD_SELECT';
+
 let first = true;
+
 function Download({links, show}) {
 
-    const [data, setData] = useState({download: links, upload: [], diff: []});
-    const [status, setStatus] = useState({download: false, upload: false});
+    const [data, setData] = useState({download: links, upload: [], final: []});
+    const [status, setStatus] = useState({download: false, upload: false, downloadType: DOWNLOAD_ALL});
 
     useEffect(() => {
         if (show && first)
@@ -35,13 +40,13 @@ function Download({links, show}) {
             const result = JSON.parse(reader.result);
 
             // May handle this algorithm at backend
-            const {download, upload, diff, success} = extractChanges(result, e.target.id)
-
+            const {download, upload, final, success} = extractChanges(result, e.target.id)
+            
             // If file has a 0-length array, or invalid format
             if (!success)
                 return
 
-            setData({download, upload, diff});
+            setData(p => ({...p, download, upload, final}));
             setStatus(p => ({...p, [e.target.id]: true}));
         }
     }
@@ -69,26 +74,24 @@ function Download({links, show}) {
 
         // Check array length of file, download, upload data
         if (name === 'download' && uploadLen === 0)
-            return {download: links, upload: [], diff: [], success: true};
+            return {download: links, upload: [], final: links, success: true};
 
         if (name === 'upload' && downloadLen === 0)
-            return {download: [], upload: links, diff: [], success: true};
+            return {download: [], upload: links, final: [], success: true};
 
 
         // Find the difference of 2 data.
         if (name === 'upload')
-            return actualData(links, download);
+            return actualData(links, download, name);
         if (name === 'download')
-            return actualData(upload, links)
+            return actualData(upload, links, name)
         
         return {success: true};
     }   
 
-    function actualData(inner, outer) {
+    function actualData(inner, outer, name) {
         const downloadLen = outer.length;
         const upload = [...new Array(downloadLen)];
-        let diff = [...new Array(downloadLen)];
-        let diff_idx = 0;
 
         for (let i = 0; i < downloadLen; i++) {
             let count = 0;
@@ -111,17 +114,18 @@ function Download({links, show}) {
 
             if (count === 1) {
                 upload[i] = matches;
-                diff[diff_idx] = matches;
-                diff_idx++; 
             } else {
                 upload[i] = {url: '', name: '-------------'};
             }
-            // upload[i] = count === 1 ? matches : {url: '', name: '-------------'}
         }
 
-        diff = diff.slice(0, diff_idx);
+        const isDiffType = status.downloadType === DOWNLOAD_DIFF;
+        if (isDiffType) {
+            const {final} = findChanges({upload: inner, download: outer}); 
+            return {upload, download: outer, final, success: true};
+        }
 
-        return {upload, download: outer, diff, success: true}
+        return {upload, download: outer, final: outer, success: true}
     }
 
     function checkFileData(obj) {
@@ -143,14 +147,57 @@ function Download({links, show}) {
         return true;
     }
 
+    function select(e) {
+        
+    }
+
+    function downloadType(type) {
+        setStatus(p => ({...p, downloadType: type}))
+
+        if (type === DOWNLOAD_ALL)
+            setData(p => ({...p, final: p.download}));
+        else if(type === DOWNLOAD_DIFF) {
+            setData(p => findChanges(p))
+        }
+    }
+
+    function findChanges(p) {
+        const upload = p.upload;
+        const download = p.download
+        const downloadLen = download.length;
+        const uploadLen = upload.length;
+
+        let diff = [...new Array(downloadLen)];
+        let diff_idx = 0;
+
+        for (let i = 0; i < downloadLen; i++) {
+            let count = 0;
+            
+            for (let j = 0; j < uploadLen; j++) {
+                if (upload[j].name === download[i].name) {
+                    count++;
+                    break;
+                }
+            }
+
+            if (count === 0) {
+                diff[diff_idx] = download[i];
+                diff_idx++; 
+            }
+        }
+
+        diff = diff.slice(0, diff_idx);
+        return {...p, final: diff};
+    }
+
 
 
     const links_1 = data.download.map((obj, i) => {
         return <div className="option grey" key={obj.url}>
-            <label className="tag-name" htmlFor="1">{obj.name}</label>
+            <label className="tag-name" htmlFor={obj.url}>{obj.name}</label>
 
             <label className="checkbox-wrap show" htmlFor={obj.url}>
-                <input type="checkbox" id={obj.url} className="checkbox-input" />
+                <input type="checkbox" id={obj.url} name={obj.name} className="checkbox-input" onChange={select}/>
                 <span className="checkmark red"></span>
             </label>
         </div>
@@ -162,13 +209,12 @@ function Download({links, show}) {
                 {obj.name}
             </label>
 
-            <label className="checkbox-wrap show" htmlFor="1">
+            {/* <label className="checkbox-wrap show" htmlFor="1">
                 <input type="checkbox" id="1" className="checkbox-input" />
                 <span className="checkmark red"></span>
-            </label>
+            </label> */}
         </div>
     })
-
 
 
     return <div className="selector mt-2">
@@ -209,10 +255,10 @@ function Download({links, show}) {
             }
         </div>
 
-        <Options links={data.diff}/>
+        <Options links={data.final} downloadType={downloadType}/>
     </div>
 
-    {/* <Instruction/> */}
+    <Instruction/>
     </div>
 }
 
